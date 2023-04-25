@@ -82,9 +82,10 @@ export const Login = async (req, res) => {
       }
     );
     res.cookie("refreshToken", refreshToken, {
-      // httpOnly: false,
+      sameSite : "none",
       secure: true,
-      maxAge: 24 * 60 * 60 * 1000,
+      domain: "portfolio-backend-express-js-jwt.vercel.app",
+      httpOnly: true
     });
     res.json({ accessToken });
   } catch (error) {
