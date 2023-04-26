@@ -41,5 +41,4 @@ app.use(ProductRoute);
 app.use(CertificateRoute);
 app.use(SkillRoute);
 app.use(UserRoute);
-
 app.listen(5000, () => console.log("Server Up and Running..."));
