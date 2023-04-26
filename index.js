@@ -27,15 +27,15 @@ app.use(FileUpload());
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 app.use(
   "/uploads/certificates",
-  express.static(path.join(__dirname, "uploads/certificates"))
+  express.static(path.join(__dirname, "public/uploads/certificates"))
 );
 app.use(
   "/uploads/projects",
-  express.static(path.join(__dirname, "uploads/projects"))
+  express.static(path.join(__dirname, "public/uploads/projects"))
 );
 app.use(
   "/uploads/skills",
-  express.static(path.join(__dirname, "uploads/skills"))
+  express.static(path.join(__dirname, "public/uploads/skills"))
 );
 app.use(ProductRoute);
 app.use(CertificateRoute);
