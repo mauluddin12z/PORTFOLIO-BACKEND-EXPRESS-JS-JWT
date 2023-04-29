@@ -12,8 +12,8 @@ const router = express.Router();
 
 router.get("/skills", getSkills);
 router.get("/skills/:id", getSkillById);
-router.post("/skills", postSkill);
-router.patch("/skills/:id", updateSkill);
-router.delete("/skills/:id", deleteSkill);
+router.post("/skills", verifyToken, postSkill);
+router.patch("/skills/:id", verifyToken, updateSkill);
+router.delete("/skills/:id", verifyToken, deleteSkill);
 
 export default router;

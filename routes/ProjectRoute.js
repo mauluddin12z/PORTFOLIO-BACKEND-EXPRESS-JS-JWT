@@ -6,13 +6,14 @@ import {
   postProject,
   updateProject,
 } from "../controller/ProjectController.js";
+import { verifyToken } from "../middleware/verifyToken.js";
 
 const router = express.Router();
 
 router.get("/projects", getProjects);
 router.get("/projects/:id", getProjectById);
-router.post("/projects", postProject);
-router.patch("/projects/:id", updateProject);
-router.delete("/projects/:id", deleteProject);
+router.post("/projects", verifyToken, postProject);
+router.patch("/projects/:id", verifyToken, updateProject);
+router.delete("/projects/:id", verifyToken, deleteProject);
 
 export default router;
