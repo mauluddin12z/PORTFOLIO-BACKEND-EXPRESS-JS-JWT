@@ -6,6 +6,13 @@ import { google } from "googleapis";
 import { Stream } from "stream";
 
 export const getSkills = async (req, res) => {
+  const keyFile = "../googleKey.json";
+  if (fs.existsSync(keyFile)) {
+    console.log("exist");
+  }
+  if (!fs.existsSync(keyFile)) {
+    console.log("not exist");
+  }
   try {
     const response = await Skills.findAll({
       order: [["createdAt", "DESC"]],
