@@ -8,22 +8,11 @@ import dotenv from "dotenv"
 dotenv.config()
 
 export const getSkills = async (req, res) => {
-  const keyFile = "../googleKey.json";
-  let set;
-
-  if (fs.existsSync(keyFile)) {
-    set = "exist";
-  } else {
-    set = "not exist";
-  }
   try {
     const response = await Skills.findAll({
       order: [["createdAt", "DESC"]],
     });
-    res.status(200).send({
-      msg: `${set}`,
-      response: response,
-    });
+    res.json(response);
   } catch (error) {
     console.log(error.message);
   }
