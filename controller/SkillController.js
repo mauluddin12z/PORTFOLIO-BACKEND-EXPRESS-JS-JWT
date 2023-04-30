@@ -6,7 +6,7 @@ import { google } from "googleapis";
 import { Stream } from "stream";
 
 export const getSkills = async (req, res) => {
-  const keyFile = "./googleKey.json";
+  const keyFile = "../googleKey.json";
   let set;
 
   if (fs.existsSync(keyFile)) {
