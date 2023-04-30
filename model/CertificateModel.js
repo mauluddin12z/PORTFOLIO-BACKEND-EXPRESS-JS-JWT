@@ -8,7 +8,9 @@ export const Certificates = db.define(
   {
     certificate: DataTypes.STRING,
     image: DataTypes.STRING,
+    imageUrl: DataTypes.STRING,
     pdf: DataTypes.STRING,
+    pdfUrl: DataTypes.STRING,
   },
   {
     freezeTableName: true,

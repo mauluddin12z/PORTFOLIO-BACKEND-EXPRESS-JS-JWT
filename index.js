@@ -7,7 +7,6 @@ import SkillRoute from "./routes/SkillRoute.js";
 import UserRoute from "./routes/UserRoute.js";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
-import path from "path";
 
 dotenv.config();
 const app = express();
@@ -24,19 +23,6 @@ app.use(
 );
 app.use(express.json());
 app.use(FileUpload());
-const __dirname = path.dirname(new URL(import.meta.url).pathname);
-app.use(
-  "/uploads/certificates",
-  express.static(path.join(__dirname, "public/uploads/certificates"))
-);
-app.use(
-  "/uploads/projects",
-  express.static(path.join(__dirname, "public/uploads/projects"))
-);
-app.use(
-  "/uploads/skills",
-  express.static(path.join(__dirname, "public/uploads/skills"))
-);
 app.use(ProductRoute);
 app.use(CertificateRoute);
 app.use(SkillRoute);

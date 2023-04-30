@@ -9,6 +9,7 @@ export const Projects = db.define(
     project_name: DataTypes.STRING,
     project_link: DataTypes.STRING,
     image: DataTypes.STRING,
+    imageUrl: DataTypes.STRING,
   },
   {
     freezeTableName: true,

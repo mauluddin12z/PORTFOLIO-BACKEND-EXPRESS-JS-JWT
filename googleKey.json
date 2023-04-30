@@ -1,0 +1,12 @@
+{
+    "type": "service_account",
+    "project_id": "onyx-messenger-385302",
+    "private_key_id": "bfc0b588cdc740358288637cef2e0fa69593fd60",
+    "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCrW2I3cuyTKoQn\nWTHeENoHHBGG3yyGqBYEe7wfHfy4oHnxdlpQ+1cN9BY2jIfeo9wTjKGuV7vGvxlO\ncDTRpvX9cVVFvZAIgg3K5kck63gYyll3JhZG9wfnkhjT9rhX41O/Bz4/8ZKTAQ/Z\nPdiyyqydnEhpGH+todYJfFqxSxTiL/O4L68XROvccdd2dqioXzv1fQpwZRxvJ0lM\nalb7Notsc0klDrkzN4xq7okfQ4YNZp+dwtzxYLBfji4lKvX/bJ71ff8mngGKad50\n48OtWKfDJSghtHSdgIpFnIuY5y1uYooV6dJo9rGcGgnXOpfsEsefmxYwY9ZbDtXt\nHfYo3eLpAgMBAAECggEAA/e+OvV0x+WUoMqebntqaP674ykYwVd0Bw+MaBYMK4Q/\nvpkUd0qSlfagawvu+3dE2ckIV16dsPjsz5Wmi3I3wPIWXOKKSsAkLJ4PaKnxInXR\nA4LEwkjnDHQkEghk9VgEsOgsh1ODJtc/9DJL6bvqqk2bmZ9hGXalW5vfB7rq1V/o\nIxmuGiGhXSwhYwEWLDqA52PG/nWgHLI+qyUanGH9IjnwlaeRGASISdE5qeU9eghV\nB4OlAKOPzCv1yVIPSV20E4zchA1TqNE3ZFJngKWQi5BhPwfPsKCBdK9lOdRaSJpe\nUQjvFuGnVMRIRvzuU7H/rPjph0mXv7tzctBuYQA2LwKBgQDkL56ORkTqDuU4nfTs\n32uRBW6YBtG/HKALGWBn0mEFq3Gdv8vP85bLsRpCT/AQuKRH3tqkAgM5/T/R3zFk\npDE258Cc36zRiF/cyOO6L4IGuO/52aMCTbnGmDI7InQjEB6+dH9pUPUSff8FkTd8\nOuiNFwP0S93O1qcjKaYg49vtfwKBgQDAPnRqUQDEWHk1zuU8XUrczl7Z9A6WNC/L\nq/Md5CgulbkToqRggQ/KB5jQR18JJjsJPhOTOap76WPgZrp0293J2yQGmqSlpqAc\n6QTf5hUvD/TFHPS7B/ZSyTD4yS7IaiHmjeOD3RbtEdsSkTdvmSeitbPPnlMThjoe\nhGUoyWuzlwKBgAIEFa+GGWfD9+x3IMnS831VgfOf48x/cT6H290u86J8MEXHgwJ0\nUXm9N9EsKZ/MMc9cvavDRMoHXb/569LKzJCCnaYFJ962CLrHn5NuhgSPL7eSX6lO\njHyfrZnuJP6GTu850kJY78FZEZ63+LiFQLa2ZFeNMAl6xgE+hfQ2byP7AoGATtlO\n5kxTBDVFgcxaOWgKTIZYYQy47uJ4uBDOpnPuBy1hu6v5v5sv3q0/AC5FzHrhu+i6\nHqiIREp1rJR15XhIf4JiRFMpNMgi47ivRyYXijYBLtexiQS7AzmB3Iinp4vgW6/W\noT8NKC8qq3LkSeGHYDUmiwFlEZz8OYgT9aanhgECgYEA4A+epFoypvkSC6wI6IUZ\nRFMX/7XzBUUzekRR4dz36vJrNCRpd7wJH5mTdkp5kODkHKGr6A1RsPNIf4aztbrr\ntytJ6ENXinXQ23kIAMu/uBHD0EuAPkhxqBxNNPY/tMZvPh+PkLoAMquZy9r38dC8\naJ5F7FVehWymdjRYK76pvS4=\n-----END PRIVATE KEY-----\n",
+    "client_email": "my-portfolio-storage@onyx-messenger-385302.iam.gserviceaccount.com",
+    "client_id": "112233291863497617255",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/my-portfolio-storage%40onyx-messenger-385302.iam.gserviceaccount.com"
+  }

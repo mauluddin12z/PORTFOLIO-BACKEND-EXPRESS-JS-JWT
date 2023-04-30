@@ -8,8 +8,10 @@ export const Skills = db.define(
   {
     skill: DataTypes.STRING,
     image: DataTypes.STRING,
+    imageUrl: DataTypes.STRING,
   },
   {
     freezeTableName: true,
   }
 );
+

@@ -1,7 +1,9 @@
 import { Certificates } from "../model/CertificateModel.js";
 import path from "path";
 import fs from "fs";
-import datetimenow from "../datetimeFormatter.js";
+import datetimenow from "../datetimeformatter.js";
+import { google } from "googleapis";
+import { Stream } from "stream";
 
 export const getCertificates = async (req, res) => {
   try {
@@ -27,6 +29,13 @@ export const getCertificateById = async (req, res) => {
   }
 };
 
+const MY_IMAGE_FOLDER_PARENT_ID = "1sv4D23ka74mdiNeho-m5ZvX1pnruN_VN";
+const MY_PDF_FOLDER_PARENT_ID = "1BgRtDP88gGG7hPEHJ3SopNt1f8_dPTgr";
+const auth = new google.auth.GoogleAuth({
+  keyFile: "./googleKey.json",
+  scopes: ["https://www.googleapis.com/auth/drive"],
+});
+const drive = google.drive({ version: "v3", auth });
 export const postCertificate = async (req, res) => {
   const certificate = req.body.certificate;
   const image = req.files.image;
@@ -47,29 +56,70 @@ export const postCertificate = async (req, res) => {
   if (imageFileSize > maxFileSize)
     return res.status(422).json({ msg: "Image must be less than 50 MB" });
 
-  pdf.mv(`./public/uploads/certificates/PDF/${pdfFileName}`, async (err) => {
-    if (err) {
-      return res.status(500).json({ msg: err.message });
+  try {
+    //IMAGE
+    const imageFileMetadata = {
+      name: imageFileName,
+      parents: [MY_IMAGE_FOLDER_PARENT_ID],
+    };
+    const imageMedia = {
+      mimeType: image.mimetype,
+      body: Stream.Readable.from(image.data),
+    };
+    await drive.files.create({
+      requestBody: imageFileMetadata,
+      media: imageMedia,
+      fields: "id",
+    });
+
+    const imageQuery = `name='${imageFileName}' and mimeType contains 'image'`;
+    const imageResponse = await drive.files.list({
+      q: imageQuery,
+      fields: "files(id)",
+    });
+
+    if (imageResponse.data.files.length === 0) {
+      throw new Error(`File '${imageFileName}' not found`);
     }
-    image.mv(
-      `./public/uploads/certificates/images/${imageFileName}`,
-      async (err) => {
-        if (err) {
-          return res.status(500).json({ msg: err.message });
-        }
-        try {
-          await Certificates.create({
-            certificate: certificate.toUpperCase(),
-            image: imageFileName,
-            pdf: pdfFileName,
-          });
-          res.status(201).json({ msg: `Certificate Created Successfully` });
-        } catch (error) {
-          console.log(error.message);
-        }
-      }
-    );
-  });
+    const imageFileId = imageResponse.data.files[0].id;
+    const imageUrl = `https://drive.google.com/uc?export=view&id=${imageFileId}`;
+
+    //PDF
+    const pdfFileMetadata = {
+      name: pdfFileName,
+      parents: [MY_PDF_FOLDER_PARENT_ID],
+    };
+    const pdfMedia = {
+      mimeType: pdf.mimetype,
+      body: Stream.Readable.from(pdf.data),
+    };
+    await drive.files.create({
+      requestBody: pdfFileMetadata,
+      media: pdfMedia,
+      fields: "id",
+    });
+    const pdfQuery = `name='${pdfFileName}' and mimeType contains 'pdf'`;
+    const pdfResponse = await drive.files.list({
+      q: pdfQuery,
+      fields: "files(id)",
+    });
+    if (pdfResponse.data.files.length === 0) {
+      throw new Error(`File '${pdfFileName}' not found`);
+    }
+    const pdfFileId = pdfResponse.data.files[0].id;
+    const pdfUrl = `https://drive.google.com/uc?export=view&id=${pdfFileId}`;
+
+    await Certificates.create({
+      certificate: certificate.toUpperCase(),
+      image: imageFileName,
+      imageUrl,
+      pdf: pdfFileName,
+      pdfUrl,
+    });
+    res.status(201).json({ msg: `Certificate Created Successfully` });
+  } catch (error) {
+    console.log(error.message);
+  }
 };
 
 export const updateCertificate = async (req, res) => {
@@ -109,23 +159,110 @@ export const updateCertificate = async (req, res) => {
       return res.status(422).json({ msg: "Image must be less than 50 MB" });
     if (pdfFileSize > maxFileSize)
       return res.status(422).json({ msg: "PDF must be less than 50 MB" });
-    const imageFilepath = `./public/uploads/certificates/images/${getCertificateById.image}`;
-    const pdfFilepath = `./public/uploads/certificates/PDF/${getCertificateById.pdf}`;
-    fs.unlinkSync(imageFilepath);
-    fs.unlinkSync(pdfFilepath);
-    pdf.mv(`./public/uploads/certificates/PDF/${pdfFileName}`, async (err) => {
-      if (err) {
-        return res.status(500).json({ msg: err.message });
+    try {
+      const imageQuery = `name='${getCertificateById.image}' and mimeType contains 'image'`;
+      const imageResponse = await drive.files.list({
+        q: imageQuery,
+        fields: "files(id)",
+      });
+
+      if (imageResponse.data.files.length === 0) {
+        throw new Error(`File '${getCertificateById.image}' not found`);
       }
-    });
-    image.mv(
-      `./public/uploads/certificates/images/${imageFileName}`,
-      async (err) => {
-        if (err) {
-          return res.status(500).json({ msg: err.message });
+      const imageFileId = imageResponse.data.files[0].id;
+
+      const pdfQuery = `name='${getCertificateById.pdf}' and mimeType contains 'application/pdf'`;
+      const pdfResponse = await drive.files.list({
+        q: pdfQuery,
+        fields: "files(id)",
+      });
+
+      if (pdfResponse.data.files.length === 0) {
+        throw new Error(`File '${getCertificateById.pdf}' not found`);
+      }
+      const pdfFileId = pdfResponse.data.files[0].id;
+
+      drive.files.delete({
+        fileId: imageFileId,
+      });
+      drive.files.delete({
+        fileId: pdfFileId,
+      });
+      res.sendStatus(200);
+    } catch (error) {
+      console.log(error.message);
+    }
+
+    try {
+      //IMAGE
+      const imageFileMetadata = {
+        name: imageFileName,
+        parents: [MY_IMAGE_FOLDER_PARENT_ID],
+      };
+      const imageMedia = {
+        mimeType: image.mimetype,
+        body: Stream.Readable.from(image.data),
+      };
+      await drive.files.create({
+        requestBody: imageFileMetadata,
+        media: imageMedia,
+        fields: "id",
+      });
+
+      const imageQuery = `name='${imageFileName}' and mimeType contains 'image'`;
+      const imageResponse = await drive.files.list({
+        q: imageQuery,
+        fields: "files(id)",
+      });
+
+      if (imageResponse.data.files.length === 0) {
+        throw new Error(`File '${imageFileName}' not found`);
+      }
+      const imageFileId = imageResponse.data.files[0].id;
+      const imageUrl = `https://drive.google.com/uc?export=view&id=${imageFileId}`;
+
+      //PDF
+      const pdfFileMetadata = {
+        name: pdfFileName,
+        parents: [MY_PDF_FOLDER_PARENT_ID],
+      };
+      const pdfMedia = {
+        mimeType: pdf.mimetype,
+        body: Stream.Readable.from(pdf.data),
+      };
+      await drive.files.create({
+        requestBody: pdfFileMetadata,
+        media: pdfMedia,
+        fields: "id",
+      });
+      const pdfQuery = `name='${pdfFileName}' and mimeType contains 'pdf'`;
+      const pdfResponse = await drive.files.list({
+        q: pdfQuery,
+        fields: "files(id)",
+      });
+      if (pdfResponse.data.files.length === 0) {
+        throw new Error(`File '${pdfFileName}' not found`);
+      }
+      const pdfFileId = pdfResponse.data.files[0].id;
+      const pdfUrl = `https://drive.google.com/uc?export=view&id=${pdfFileId}`;
+      await Certificates.update(
+        {
+          certificate: certificate.toUpperCase(),
+          image: imageFileName,
+          imageUrl,
+          pdf: pdfFileName,
+          pdfUrl,
+        },
+        {
+          where: {
+            id: req.params.id,
+          },
         }
-      }
-    );
+      );
+      res.status(201).json({ msg: `Certificate Updated Successfully` });
+    } catch (error) {
+      console.log(error.message);
+    }
   } else if (req.files.image) {
     const image = req.files.image;
     const imageFileSize = image.data.length;
@@ -139,16 +276,67 @@ export const updateCertificate = async (req, res) => {
       return res.status(422).json({ msg: "Invalid Images" });
     if (imageFileSize > maxFileSize)
       return res.status(422).json({ msg: "Image must be less than 50 MB" });
-    const imageFilepath = `./public/uploads/certificates/images/${getCertificateById.image}`;
-    fs.unlinkSync(imageFilepath);
-    image.mv(
-      `./public/uploads/images/certificates/${imageFileName}`,
-      async (err) => {
-        if (err) {
-          return res.status(500).json({ msg: err.message });
-        }
+    try {
+      const imageQuery = `name='${getCertificateById.image}' and mimeType contains 'image'`;
+      const imageResponse = await drive.files.list({
+        q: imageQuery,
+        fields: "files(id)",
+      });
+
+      if (imageResponse.data.files.length === 0) {
+        throw new Error(`File '${getCertificateById.image}' not found`);
       }
-    );
+      const imageFileId = imageResponse.data.files[0].id;
+      drive.files.delete({
+        fileId: imageFileId,
+      });
+      res.sendStatus(200);
+    } catch (error) {
+      console.log(error.message);
+    }
+    try {
+      //IMAGE
+      const imageFileMetadata = {
+        name: imageFileName,
+        parents: [MY_IMAGE_FOLDER_PARENT_ID],
+      };
+      const imageMedia = {
+        mimeType: image.mimetype,
+        body: Stream.Readable.from(image.data),
+      };
+      await drive.files.create({
+        requestBody: imageFileMetadata,
+        media: imageMedia,
+        fields: "id",
+      });
+
+      const imageQuery = `name='${imageFileName}' and mimeType contains 'image'`;
+      const imageResponse = await drive.files.list({
+        q: imageQuery,
+        fields: "files(id)",
+      });
+
+      if (imageResponse.data.files.length === 0) {
+        throw new Error(`File '${imageFileName}' not found`);
+      }
+      const imageFileId = imageResponse.data.files[0].id;
+      const imageUrl = `https://drive.google.com/uc?export=view&id=${imageFileId}`;
+      await Certificates.update(
+        {
+          certificate: certificate.toUpperCase(),
+          image: imageFileName,
+          imageUrl,
+        },
+        {
+          where: {
+            id: req.params.id,
+          },
+        }
+      );
+      res.status(201).json({ msg: `Certificate Updated Successfully` });
+    } catch (error) {
+      console.log(error.message);
+    }
   } else if (req.files.pdf) {
     const pdf = req.files.pdf;
     const pdfFileSize = pdf.data.length;
@@ -162,31 +350,65 @@ export const updateCertificate = async (req, res) => {
       return res.status(422).json({ msg: "Invalid PDF" });
     if (pdfFileSize > maxFileSize)
       return res.status(422).json({ msg: "PDF must be less than 50 MB" });
-    const pdfFilepath = `./public/uploads/certificates/PDF/${getCertificateById.pdf}`;
+    try {
+      const pdfQuery = `name='${getCertificateById.pdf}' and mimeType contains 'application/pdf'`;
+      const pdfResponse = await drive.files.list({
+        q: pdfQuery,
+        fields: "files(id)",
+      });
 
-    fs.unlinkSync(pdfFilepath);
-    pdf.mv(`./public/uploads/certificates/PDF/${pdfFileName}`, async (err) => {
-      if (err) {
-        return res.status(500).json({ msg: err.message });
+      if (pdfResponse.data.files.length === 0) {
+        throw new Error(`File '${getCertificateById.pdf}' not found`);
       }
-    });
-  }
-  try {
-    await Certificates.update(
-      {
-        certificate: certificate.toUpperCase(),
-        image: imageFileName,
-        pdf: pdfFileName,
-      },
-      {
-        where: {
-          id: req.params.id,
+      const pdfFileId = pdfResponse.data.files[0].id;
+      drive.files.delete({
+        fileId: pdfFileId,
+      });
+      res.sendStatus(200);
+    } catch (error) {
+      console.log(error.message);
+    }
+    try {
+      //PDF
+      const pdfFileMetadata = {
+        name: pdfFileName,
+        parents: [MY_PDF_FOLDER_PARENT_ID],
+      };
+      const pdfMedia = {
+        mimeType: pdf.mimetype,
+        body: Stream.Readable.from(pdf.data),
+      };
+      await drive.files.create({
+        requestBody: pdfFileMetadata,
+        media: pdfMedia,
+        fields: "id",
+      });
+      const pdfQuery = `name='${pdfFileName}' and mimeType contains 'pdf'`;
+      const pdfResponse = await drive.files.list({
+        q: pdfQuery,
+        fields: "files(id)",
+      });
+      if (pdfResponse.data.files.length === 0) {
+        throw new Error(`File '${pdfFileName}' not found`);
+      }
+      const pdfFileId = pdfResponse.data.files[0].id;
+      const pdfUrl = `https://drive.google.com/uc?export=view&id=${pdfFileId}`;
+      await Certificates.update(
+        {
+          certificate: certificate.toUpperCase(),
+          pdf: pdfFileName,
+          pdfUrl,
         },
-      }
-    );
-    res.status(201).json({ msg: `Certificate Updated Successfully` });
-  } catch (error) {
-    console.log(error.message);
+        {
+          where: {
+            id: req.params.id,
+          },
+        }
+      );
+      res.status(201).json({ msg: `Certificate Updated Successfully` });
+    } catch (error) {
+      console.log(error.message);
+    }
   }
 };
 
@@ -200,16 +422,41 @@ export const deleteCertificate = async (req, res) => {
     return res.status(404).json({ msg: "No Data Found" });
 
   try {
-    const imageFilepath = `./public/uploads/certificates/images/${getCertificateById.image}`;
-    const pdfFilepath = `./public/uploads/certificates/pdf/${getCertificateById.pdf}`;
-    fs.unlinkSync(imageFilepath);
-    fs.unlinkSync(pdfFilepath);
+    const imageQuery = `name='${getCertificateById.image}' and mimeType contains 'image'`;
+    const imageResponse = await drive.files.list({
+      q: imageQuery,
+      fields: "files(id)",
+    });
+
+    if (imageResponse.data.files.length === 0) {
+      throw new Error(`File '${getCertificateById.image}' not found`);
+    }
+    const imageFileId = imageResponse.data.files[0].id;
+
+    const pdfQuery = `name='${getCertificateById.pdf}' and mimeType contains 'application/pdf'`;
+    const pdfResponse = await drive.files.list({
+      q: pdfQuery,
+      fields: "files(id)",
+    });
+
+    if (pdfResponse.data.files.length === 0) {
+      throw new Error(`File '${getCertificateById.pdf}' not found`);
+    }
+    const pdfFileId = pdfResponse.data.files[0].id;
+
+    drive.files.delete({
+      fileId: imageFileId,
+    });
+    drive.files.delete({
+      fileId: pdfFileId,
+    });
+
     await Certificates.destroy({
       where: {
         id: req.params.id,
       },
     });
-    res.status(200).json({ msg: "Product Deleted Successfuly" });
+    res.status(200).json({ msg: `Certificate deleted Successfully` });
   } catch (error) {
     console.log(error.message);
   }
