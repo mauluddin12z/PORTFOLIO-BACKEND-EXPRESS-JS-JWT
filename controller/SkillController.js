@@ -4,6 +4,8 @@ import { Skills } from "../model/SkillModel.js";
 import datetimenow from "../datetimeFormatter.js";
 import { google } from "googleapis";
 import { Stream } from "stream";
+import dotenv from "dotenv"
+dotenv.config()
 
 export const getSkills = async (req, res) => {
   try {
@@ -31,7 +33,7 @@ export const getSkillById = async (req, res) => {
 
 const MY_IMAGE_FOLDER_PARENT_ID = "1z4GtzhH_5NQ7dRt09kRpF91BeYA5y9Z_";
 const auth = new google.auth.GoogleAuth({
-  keyFile: "./googleKey.json",
+  credentials: JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS),
   scopes: ["https://www.googleapis.com/auth/drive"],
 });
 const drive = google.drive({ version: "v3", auth });

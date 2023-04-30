@@ -4,6 +4,8 @@ import { Projects } from "../model/PorjectModel.js";
 import datetimenow from "../datetimeFormatter.js";
 import { google } from "googleapis";
 import { Stream } from "stream";
+import dotenv from "dotenv"
+dotenv.config()
 
 export const getProjects = async (req, res) => {
   try {
@@ -31,7 +33,7 @@ export const getProjectById = async (req, res) => {
 
 const MY_IMAGE_FOLDER_PARENT_ID = "1RI-N2AjY652mOTPh1qJ9o5B4H-DdxAKp";
 const auth = new google.auth.GoogleAuth({
-  keyFile: "./googleKey.json",
+  credentials: JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS),
   scopes: ["https://www.googleapis.com/auth/drive"],
 });
 const drive = google.drive({ version: "v3", auth });

@@ -4,6 +4,8 @@ import fs from "fs";
 import datetimenow from "../datetimeFormatter.js";
 import { google } from "googleapis";
 import { Stream } from "stream";
+import dotenv from "dotenv"
+dotenv.config()
 
 export const getCertificates = async (req, res) => {
   try {
@@ -32,7 +34,7 @@ export const getCertificateById = async (req, res) => {
 const MY_IMAGE_FOLDER_PARENT_ID = "1sv4D23ka74mdiNeho-m5ZvX1pnruN_VN";
 const MY_PDF_FOLDER_PARENT_ID = "1BgRtDP88gGG7hPEHJ3SopNt1f8_dPTgr";
 const auth = new google.auth.GoogleAuth({
-  keyFile: "./googleKey.json",
+  credentials: JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS),
   scopes: ["https://www.googleapis.com/auth/drive"],
 });
 const drive = google.drive({ version: "v3", auth });
