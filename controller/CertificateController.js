@@ -12,9 +12,9 @@ export const getCertificates = async (req, res) => {
     const response = await Certificates.findAll({
       order: [["createdAt", "DESC"]],
     });
-    return res.status(422).json({ msg: process.env.MYSQL_ADDON_URI });
+    res.json(response);
   } catch (error) {
-    console.log(process.env.MYSQL_ADDON_URI);
+    console.log(error.message);
   }
 };
 
